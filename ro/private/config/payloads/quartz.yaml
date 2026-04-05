@@ -1,0 +1,6 @@
+tasks: # URL строка задание кварца
+  url-1: http://localhost:42002/dispatcher/collect-payloads
+# Таймаут выполнения
+request-timeout-mls: 1000,
+result-timeout-mcs:
+  "*": 1e6

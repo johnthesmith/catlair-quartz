@@ -1,0 +1,6 @@
+# Exclude nano files
+*.swp
+*.save
+
+# Exclude ./rw folder
+rw/*

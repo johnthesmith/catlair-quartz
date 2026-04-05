@@ -1,0 +1,14 @@
+# Quartz config file
+app:
+  log:
+    enabled: true
+    trap: true
+
+# Engine settings
+engine:
+  # Projects pathes for components searchig like files, payloads etc
+  projects:
+  - ./
+  - ../default
+  payload: quartz
+  method: loop
