@@ -28,22 +28,21 @@ class Quartz extends Payload
     public function loop
     (
         /* Section id */
-        string | null $task = null
+        string | null $url = null
     )
     {
         if
         (
             $this -> validate
             (
-                empty( $task ),
-                'quartz-task-is-empty',
+                empty( $url ),
+                'url-is-empty',
                 [ 'msg' => 'need --task=<task-id> arguent' ]
             ) -> isOk()
         )
         {
             /* Termination flag */
             $terminate = false;
-
             /* Mail loop */
             while( !$terminate )
             {
@@ -53,36 +52,26 @@ class Quartz extends Payload
                 /* Monitoring begin */
                 $this -> monBegin();
 
-                /* Строка вызова метода из монолита */
-                $urlRequest = $config[ 'tasks' ][ $task ] ?? null;
+                /* Строка вызова метода */
                 /* Таймаут ожидания ответа по URL */
                 $requestTimeoutMls  = $config[ 'request-timeout-mls' ] ?? 0;
 
-                /* Валидация входящих параметров */
-                if
-                (
-                    $this
-                    -> validate( empty( $urlRequest ), 'url-is-empty' )
-                    -> isOk()
-                )
-                {
-                    $url = Url::create() -> parse( $urlRequest );
+                $urlObj = Url::create() -> parse( $url );
 
-                    /* Фиксация Момента начала запроса */
-                    $this -> getMon( true )
-                    -> set([ 'config', 'url' ], $url -> toString() )
-                    -> set([ 'config', 'log' ], $this -> getLog() -> getFilePath() )
-                    ;
+                /* Фиксация Момента начала запроса */
+                $this -> getMon( true )
+                -> set([ 'config', 'url' ], $url )
+                -> set([ 'config', 'log' ], $this -> getLog() -> getFilePath() )
+                ;
 
-                    /* Создание и исполнение запроса */
-                    $answer = WebBot::create( $this -> getLog() )
-                    -> setRequestTimeoutMls( $requestTimeoutMls )
-                    -> setUrl( $url )
-                    -> execute()
-                    -> decodeJSON()
-                    -> resultTo( $this )
-                    -> getAnswer();
-                }
+                /* Создание и исполнение запроса */
+                $answer = WebBot::create( $this -> getLog() )
+                -> setRequestTimeoutMls( $requestTimeoutMls )
+                -> setUrl( $urlObj )
+                -> execute()
+                -> decodeJSON()
+                -> resultTo( $this )
+                -> getAnswer();
 
                 /* Обработка ответов сервера */
                 if( $this -> isOk())
@@ -95,6 +84,8 @@ class Quartz extends Payload
                 -> add([ 'results', $this -> getCode() ])
                 /* Отметка результата результата последнего */
                 -> set([ 'last', 'result' ], $this -> getResultAsArray() );
+
+                $this -> getLog() -> trace() -> dump( $this -> getResultAsArray());
 
                 $timeout = $config[ 'result-timeout-mcs' ][ $this -> getCode() ] ??
                            ( $config[ 'result-timeout-mcs' ][ '*' ] ?? 1e6 );

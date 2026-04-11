@@ -2,7 +2,7 @@
 app:
   log:
     enabled: true
-    trap: true
+    trap: false
 
 # Engine settings
 engine:
@@ -10,5 +10,7 @@ engine:
   projects:
   - ./
   - ../default
-  payload: quartz
-  method: loop
+  # default arguments
+  default:
+    # For undefined route will be use followng route
+    route-name: make

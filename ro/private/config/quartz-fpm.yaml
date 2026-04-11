@@ -1,0 +1,51 @@
+# Quartz config file
+app:
+  log:
+    enabled: true
+    trap: true
+
+# Engine settings
+engine:
+  # Projects pathes for components searchig like files, payloads etc
+  projects:
+  - ./
+  - ../default
+  # default arguments
+  default:
+    # For undefined route will be use followng route
+    route-name: make
+
+# Web settings 
+web:
+  default:
+    # default context
+    context: [ default ]
+  # Session settings
+  session:
+    # Disable or enable session 
+    enabled: false
+    # Time to live for session cookie
+    ttl-sec: 86400
+    # This is default secure key
+    ssl-key: MySecureKey
+  rules:
+    # из локальной подсети
+    127.0.0.1/8:
+      # для localhost пустая ссылка уходит на вывод контента
+      "*":
+        "/":
+          uri: /content/page/main.html
+          trace: true
+        "*":
+          trace: true
+    # со всех инфх адресов
+    0.0.0.0/0:
+      # для всех хостов любая ссылка уходит в ошибку
+      "*":
+        "*":
+          action: error/error404
+          trace: false
+  # options for cli starting with `php index.php`
+  cli:
+    # url for cli mode
+    url: http://localhost
